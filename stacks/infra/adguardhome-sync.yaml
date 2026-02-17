@@ -1,0 +1,15 @@
+origin:
+  url: http://192.168.129.200:3002
+  username: admin
+  password: CHANGE_ME
+
+replicas:
+  - url: http://192.168.129.200:3003
+    username: admin
+    password: CHANGE_ME
+
+cron: "*/10 * * * *"
+runOnStart: true
+
+api:
+  port: 8080

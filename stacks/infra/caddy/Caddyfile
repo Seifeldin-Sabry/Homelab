@@ -1,0 +1,39 @@
+{
+	acme_dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+}
+
+jellyfin.homelab.{$DOMAIN} {
+	reverse_proxy 192.168.129.10:8096
+}
+
+sonarr.homelab.{$DOMAIN} {
+	reverse_proxy 192.168.129.10:8989
+}
+
+radarr.homelab.{$DOMAIN} {
+	reverse_proxy 192.168.129.10:7878
+}
+
+homepage.homelab.{$DOMAIN} {
+	reverse_proxy homepage:3000
+}
+
+status.homelab.{$DOMAIN} {
+	reverse_proxy uptime-kuma:3001
+}
+
+jellyseerr.homelab.{$DOMAIN} {
+	reverse_proxy 192.168.129.10:5055
+}
+
+bazarr.homelab.{$DOMAIN} {
+	reverse_proxy 192.168.129.10:6767
+}
+
+prowlarr.homelab.{$DOMAIN} {
+	reverse_proxy 192.168.129.10:9696
+}
+
+qbit.homelab.{$DOMAIN} {
+	reverse_proxy 192.168.129.10:8080
+}

@@ -1,0 +1,41 @@
+auto lo
+iface lo inet loopback
+
+iface nic0 inet manual
+
+auto vmbr0
+iface vmbr0 inet static
+	address 192.168.129.200/23
+	gateway 192.168.128.1
+	bridge-ports nic0
+	bridge-stp off
+	bridge-fd 0
+
+auto vmbr1
+iface vmbr1 inet static
+	address 10.10.10.1/24
+	bridge-ports none
+	bridge-stp off
+	bridge-fd 0
+	# NAT for containers on private bridge
+	post-up iptables -t nat -A POSTROUTING -s 10.10.10.0/24 -o vmbr0 -j MASQUERADE
+	post-up iptables -A FORWARD -i vmbr1 -o vmbr0 -j ACCEPT
+	post-up iptables -A FORWARD -i vmbr0 -o vmbr1 -m state --state RELATED,ESTABLISHED -j ACCEPT
+	# DNS forwarding to AdGuard primary (CT 101)
+	post-up iptables -t nat -A PREROUTING -i vmbr0 -p udp --dport 53 -j DNAT --to-destination 10.10.10.2
+	post-up iptables -t nat -A PREROUTING -i vmbr0 -p tcp --dport 53 -j DNAT --to-destination 10.10.10.2
+	post-up iptables -t nat -A OUTPUT -p udp --dport 53 -d 192.168.129.200 -j DNAT --to-destination 10.10.10.2
+	post-up iptables -t nat -A OUTPUT -p tcp --dport 53 -d 192.168.129.200 -j DNAT --to-destination 10.10.10.2
+	# AdGuard web UI forwarding
+	post-up iptables -t nat -A PREROUTING -i vmbr0 -p tcp --dport 3002 -j DNAT --to-destination 10.10.10.2:80
+	post-up iptables -t nat -A PREROUTING -i vmbr0 -p tcp --dport 3003 -j DNAT --to-destination 10.10.10.3:80
+	# Cleanup on bridge down
+	post-down iptables -t nat -D POSTROUTING -s 10.10.10.0/24 -o vmbr0 -j MASQUERADE
+	post-down iptables -D FORWARD -i vmbr1 -o vmbr0 -j ACCEPT
+	post-down iptables -D FORWARD -i vmbr0 -o vmbr1 -m state --state RELATED,ESTABLISHED -j ACCEPT
+	post-down iptables -t nat -D PREROUTING -i vmbr0 -p udp --dport 53 -j DNAT --to-destination 10.10.10.2
+	post-down iptables -t nat -D PREROUTING -i vmbr0 -p tcp --dport 53 -j DNAT --to-destination 10.10.10.2
+	post-down iptables -t nat -D OUTPUT -p udp --dport 53 -d 192.168.129.200 -j DNAT --to-destination 10.10.10.2
+	post-down iptables -t nat -D OUTPUT -p tcp --dport 53 -d 192.168.129.200 -j DNAT --to-destination 10.10.10.2
+	post-down iptables -t nat -D PREROUTING -i vmbr0 -p tcp --dport 3002 -j DNAT --to-destination 10.10.10.2:80
+	post-down iptables -t nat -D PREROUTING -i vmbr0 -p tcp --dport 3003 -j DNAT --to-destination 10.10.10.3:80
