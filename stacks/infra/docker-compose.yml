@@ -52,6 +52,14 @@ services:
       - "3001:3001"
     restart: unless-stopped
 
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    command: tunnel --protocol http2 run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    restart: unless-stopped
+
   adguardhome-sync:
     image: lscr.io/linuxserver/adguardhome-sync:latest
     container_name: adguardhome-sync

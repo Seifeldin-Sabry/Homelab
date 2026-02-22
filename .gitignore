@@ -2,6 +2,7 @@
 .env
 *.env
 !.env.example
+credentials.json
 
 # OS
 .DS_Store
