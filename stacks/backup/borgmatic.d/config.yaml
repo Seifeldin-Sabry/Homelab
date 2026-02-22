@@ -1,0 +1,25 @@
+repositories:
+  - path: /mnt/borg-repo
+    label: homelab
+
+source_directories:
+  - /mnt/source
+
+exclude_patterns:
+  - "*.log"
+  - "*.tmp"
+  - "**/cache/**"
+  - "**/Cache/**"
+  - "**/transcodes/**"
+
+compression: zstd,3
+
+keep_daily: 7
+keep_weekly: 4
+keep_monthly: 6
+
+checks:
+  - name: repository
+    frequency: 2 weeks
+  - name: archives
+    frequency: 1 month

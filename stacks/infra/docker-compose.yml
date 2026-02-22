@@ -1,7 +1,22 @@
 services:
+  crowdsec:
+    image: crowdsecurity/crowdsec:latest
+    container_name: crowdsec
+    environment:
+      - TZ=${TZ:-Europe/Brussels}
+      - COLLECTIONS=crowdsecurity/caddy crowdsecurity/http-cve crowdsecurity/base-http-scenarios
+    volumes:
+      - crowdsec_config:/etc/crowdsec
+      - crowdsec_data:/var/lib/crowdsec/data
+      - caddy_logs:/var/log/caddy:ro
+      - ./crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml:ro
+    restart: unless-stopped
+
   caddy:
     build: ./caddy
     container_name: caddy
+    depends_on:
+      - crowdsec
     ports:
       - "80:80"
       - "443:443"
@@ -9,10 +24,12 @@ services:
     environment:
       - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN}
       - DOMAIN=${DOMAIN}
+      - CROWDSEC_API_KEY=${CROWDSEC_API_KEY}
     volumes:
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
+      - caddy_logs:/var/log/caddy
     restart: unless-stopped
 
   homepage:
@@ -51,5 +68,8 @@ volumes:
   caddy_data:
     external: true
   caddy_config:
+  caddy_logs:
+  crowdsec_config:
+  crowdsec_data:
   homepage_config:
   uptime_kuma_data:

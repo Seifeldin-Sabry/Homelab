@@ -1,0 +1,66 @@
+services:
+  borgmatic:
+    image: ghcr.io/borgmatic-collective/borgmatic:latest
+    container_name: borgmatic
+    environment:
+      - TZ=${TZ:-Europe/Brussels}
+      - BORG_PASSPHRASE=${BORG_PASSPHRASE}
+      - CRON=0 3 * * *
+    volumes:
+      # Borgmatic config
+      - ./borgmatic.d:/etc/borgmatic.d:ro
+      # Backup target (USB HDD via NFS)
+      - /mnt/media/backups/borg:/mnt/borg-repo
+      # Borg cache
+      - borg_cache:/root/.cache/borg
+      # Media stack configs (read-only)
+      - media_sonarr_config:/mnt/source/sonarr:ro
+      - media_radarr_config:/mnt/source/radarr:ro
+      - media_prowlarr_config:/mnt/source/prowlarr:ro
+      - media_bazarr_config:/mnt/source/bazarr:ro
+      - media_jellyfin_config:/mnt/source/jellyfin:ro
+      - media_jellyseerr_config:/mnt/source/jellyseerr:ro
+      - media_qbittorrent_config:/mnt/source/qbittorrent:ro
+      - media_recyclarr_config:/mnt/source/recyclarr:ro
+      - media_gluetun_data:/mnt/source/gluetun:ro
+      # Infra stack configs (read-only)
+      - infra_homepage_config:/mnt/source/homepage:ro
+      - infra_uptime_kuma_data:/mnt/source/uptime-kuma:ro
+      - caddy_data:/mnt/source/caddy-data:ro
+      - infra_caddy_config:/mnt/source/caddy-config:ro
+      - infra_crowdsec_config:/mnt/source/crowdsec-config:ro
+      - infra_crowdsec_data:/mnt/source/crowdsec-data:ro
+    restart: unless-stopped
+
+volumes:
+  borg_cache:
+  media_sonarr_config:
+    external: true
+  media_radarr_config:
+    external: true
+  media_prowlarr_config:
+    external: true
+  media_bazarr_config:
+    external: true
+  media_jellyfin_config:
+    external: true
+  media_jellyseerr_config:
+    external: true
+  media_qbittorrent_config:
+    external: true
+  media_recyclarr_config:
+    external: true
+  media_gluetun_data:
+    external: true
+  infra_homepage_config:
+    external: true
+  infra_uptime_kuma_data:
+    external: true
+  caddy_data:
+    external: true
+  infra_caddy_config:
+    external: true
+  infra_crowdsec_config:
+    external: true
+  infra_crowdsec_data:
+    external: true
